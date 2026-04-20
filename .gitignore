@@ -6,7 +6,7 @@ dist/
 coverage/
 *.log
 *.tmp
+*.exe
 .env
 .idea/
 .vscode/
-
