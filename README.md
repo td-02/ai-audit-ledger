@@ -160,11 +160,6 @@ go run main.go
 - [ ] Multi-tenant key registry
 - [ ] Anchoring: publish Merkle roots to a transparency log
 
----
-
-## Contributing
-
-Issues and PRs welcome. See [`docs/phases.md`](docs/phases.md) for the current build plan. Good first issues are tagged.
 
 ---
 
