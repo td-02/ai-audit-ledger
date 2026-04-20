@@ -1,0 +1,65 @@
+{
+  "version": "v1",
+  "record_id": "b7468cb7-ec96-44bb-8e95-653e36936b47",
+  "tenant_id": "bank-prod",
+  "application": {
+    "name": "loan-underwriter",
+    "environment": "prod",
+    "actor_id": "customer-9182",
+    "trace_id": "7d4cd17b5b4540db",
+    "span_id": "8a40b90cc1e8e278"
+  },
+  "model": {
+    "provider": "openai",
+    "name": "gpt-4.1",
+    "temperature": 0.1,
+    "tool_calls": [
+      "fraud_check",
+      "kyc_profile"
+    ]
+  },
+  "decision": {
+    "category": "credit",
+    "action": "loan_decision",
+    "outcome": "approved",
+    "summary": "Application approved within policy limits.",
+    "prompt_hash": "sha256:6de4f6d3",
+    "response_hash": "sha256:17fbbf90"
+  },
+  "policy": {
+    "policy_ids": [
+      "loan-policy-v3",
+      "ecoA-review-rule"
+    ],
+    "risk_level": "medium",
+    "requires_human_review": false
+  },
+  "timing": {
+    "started_at": "2026-04-20T10:15:30Z",
+    "completed_at": "2026-04-20T10:15:31Z",
+    "latency_ms": 942
+  },
+  "chain": {
+    "sequence": 182938,
+    "previous_hash": "sha256:prev123",
+    "record_hash": "sha256:curr456",
+    "merkle_batch_id": "batch-2026-04-20T10:15"
+  },
+  "signature": {
+    "algorithm": "Ed25519",
+    "public_key_id": "sdk-key-prod-1",
+    "signature": "base64:abcdef"
+  },
+  "evidence": [
+    {
+      "kind": "prompt",
+      "uri": "s3://audit-evidence/prompts/b7468cb7.json",
+      "digest": "sha256:aaa111"
+    },
+    {
+      "kind": "response",
+      "uri": "s3://audit-evidence/responses/b7468cb7.json",
+      "digest": "sha256:bbb222"
+    }
+  ]
+}

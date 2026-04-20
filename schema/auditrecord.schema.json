@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/auditrecord.schema.json",
+  "title": "AuditRecord",
+  "type": "object",
+  "required": [
+    "version",
+    "record_id",
+    "tenant_id",
+    "application",
+    "model",
+    "decision",
+    "policy",
+    "timing",
+    "chain",
+    "signature",
+    "evidence"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "v1"
+    },
+    "record_id": {
+      "type": "string",
+      "description": "Stable record identifier, typically a UUID."
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "application": {
+      "type": "object",
+      "required": [
+        "name",
+        "environment",
+        "actor_id",
+        "trace_id"
+      ],
+      "properties": {
+        "name": { "type": "string" },
+        "environment": { "type": "string" },
+        "actor_id": { "type": "string" },
+        "trace_id": { "type": "string" },
+        "span_id": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "model": {
+      "type": "object",
+      "required": [
+        "provider",
+        "name"
+      ],
+      "properties": {
+        "provider": { "type": "string" },
+        "name": { "type": "string" },
+        "temperature": { "type": "number" },
+        "tool_calls": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "decision": {
+      "type": "object",
+      "required": [
+        "category",
+        "action",
+        "outcome"
+      ],
+      "properties": {
+        "category": { "type": "string" },
+        "action": { "type": "string" },
+        "outcome": { "type": "string" },
+        "summary": { "type": "string" },
+        "prompt_hash": { "type": "string" },
+        "response_hash": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "policy": {
+      "type": "object",
+      "required": [
+        "policy_ids",
+        "risk_level"
+      ],
+      "properties": {
+        "policy_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "risk_level": { "type": "string" },
+        "requires_human_review": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "timing": {
+      "type": "object",
+      "required": [
+        "started_at",
+        "completed_at",
+        "latency_ms"
+      ],
+      "properties": {
+        "started_at": { "type": "string", "format": "date-time" },
+        "completed_at": { "type": "string", "format": "date-time" },
+        "latency_ms": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "chain": {
+      "type": "object",
+      "required": [
+        "sequence",
+        "previous_hash",
+        "record_hash"
+      ],
+      "properties": {
+        "sequence": { "type": "integer", "minimum": 0 },
+        "previous_hash": { "type": "string" },
+        "record_hash": { "type": "string" },
+        "merkle_batch_id": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "signature": {
+      "type": "object",
+      "required": [
+        "algorithm",
+        "public_key_id",
+        "signature"
+      ],
+      "properties": {
+        "algorithm": { "type": "string", "const": "Ed25519" },
+        "public_key_id": { "type": "string" },
+        "signature": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "uri"
+        ],
+        "properties": {
+          "kind": { "type": "string" },
+          "uri": { "type": "string" },
+          "digest": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
+
