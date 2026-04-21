@@ -6,7 +6,7 @@ use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 use ledger_core::{
     chain::verify_chain_link,
     merkle::{build_merkle_proof, compute_merkle_root, verify_merkle_proof, MerkleProof},
-    record::AuditRecord,
+    record::{AuditRecord, ExplanationContext},
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -22,9 +22,19 @@ struct ComplianceReport {
     proofs_generated: usize,
     merkle_proof_validation_passed: bool,
     proofs: Vec<MerkleProof>,
+    explainability_records: usize,
+    explainability_coverage_pct: f64,
+    top_explanatory_factors: Vec<FactorWeightSummary>,
     policies_observed: Vec<String>,
     outcomes: Vec<String>,
     exceptions: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct FactorWeightSummary {
+    factor: String,
+    occurrences: usize,
+    avg_weight: f64,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -109,6 +119,8 @@ fn verify_records(records: &[AuditRecord]) -> Result<()> {
 fn build_report(records: &[AuditRecord]) -> Result<ComplianceReport> {
     let head = records.last().expect("records should be non-empty");
     let (proofs, merkle_proof_validation_passed) = build_and_verify_proofs(records)?;
+    let (explainability_records, explainability_coverage_pct, top_explanatory_factors) =
+        explainability_summary(records);
 
     let mut policies = std::collections::BTreeSet::new();
     let mut outcomes = std::collections::BTreeSet::new();
@@ -134,6 +146,9 @@ fn build_report(records: &[AuditRecord]) -> Result<ComplianceReport> {
         proofs_generated: proofs.len(),
         merkle_proof_validation_passed,
         proofs,
+        explainability_records,
+        explainability_coverage_pct,
+        top_explanatory_factors,
         policies_observed: policies.into_iter().collect(),
         outcomes: outcomes.into_iter().collect(),
         exceptions,
@@ -159,6 +174,59 @@ fn build_and_verify_proofs(records: &[AuditRecord]) -> Result<(Vec<MerkleProof>,
         proofs.push(proof);
     }
     Ok((proofs, true))
+}
+
+fn explainability_summary(records: &[AuditRecord]) -> (usize, f64, Vec<FactorWeightSummary>) {
+    let mut explainability_records = 0usize;
+    let mut aggregate: std::collections::BTreeMap<String, (usize, f64)> =
+        std::collections::BTreeMap::new();
+
+    for record in records {
+        if has_explanation(record.explanation.as_ref()) {
+            explainability_records += 1;
+        }
+        if let Some(explanation) = &record.explanation {
+            for factor in &explanation.key_factors {
+                let entry = aggregate.entry(factor.name.clone()).or_insert((0, 0.0));
+                entry.0 += 1;
+                entry.1 += factor.weight;
+            }
+        }
+    }
+
+    let coverage = if records.is_empty() {
+        0.0
+    } else {
+        (explainability_records as f64 / records.len() as f64) * 100.0
+    };
+
+    let mut top = aggregate
+        .into_iter()
+        .map(
+            |(factor, (occurrences, total_weight))| FactorWeightSummary {
+                factor,
+                occurrences,
+                avg_weight: total_weight / occurrences as f64,
+            },
+        )
+        .collect::<Vec<_>>();
+    top.sort_by(|a, b| {
+        b.occurrences
+            .cmp(&a.occurrences)
+            .then_with(|| b.avg_weight.total_cmp(&a.avg_weight))
+    });
+    if top.len() > 5 {
+        top.truncate(5);
+    }
+
+    (explainability_records, coverage, top)
+}
+
+fn has_explanation(explanation: Option<&ExplanationContext>) -> bool {
+    let Some(explanation) = explanation else {
+        return false;
+    };
+    !explanation.rationale_summary.trim().is_empty() && !explanation.key_factors.is_empty()
 }
 
 fn verify_report_proofs(report: &ComplianceReport) -> Result<()> {
@@ -209,6 +277,9 @@ fn sign_report(
             proofs_generated: report.proofs_generated,
             merkle_proof_validation_passed: report.merkle_proof_validation_passed,
             proofs: report.proofs.clone(),
+            explainability_records: report.explainability_records,
+            explainability_coverage_pct: report.explainability_coverage_pct,
+            top_explanatory_factors: report.top_explanatory_factors.clone(),
             policies_observed: report.policies_observed.clone(),
             outcomes: report.outcomes.clone(),
             exceptions: report.exceptions.clone(),
@@ -306,6 +377,7 @@ mod tests {
                 prompt_hash: None,
                 response_hash: None,
             },
+            explanation: None,
             policy: PolicyContext {
                 policy_ids: vec!["policy-a".to_string(), "policy-b".to_string()],
                 risk_level: "medium".to_string(),
@@ -363,6 +435,9 @@ mod tests {
         assert_eq!(report.head_sequence, 1);
         assert_eq!(report.proofs_generated, 2);
         assert!(report.merkle_proof_validation_passed);
+        assert_eq!(report.explainability_records, 0);
+        assert_eq!(report.explainability_coverage_pct, 0.0);
+        assert!(report.top_explanatory_factors.is_empty());
         assert_eq!(
             report.outcomes,
             vec!["approved".to_string(), "denied".to_string()]
@@ -414,5 +489,36 @@ mod tests {
 
         signed.report.head_hash = "sha256:tampered".to_string();
         assert!(verify_signed_report(&signed, &public_key_hex).is_err());
+    }
+
+    #[test]
+    fn explainability_summary_tracks_coverage_and_factors() {
+        let mut first = make_record(0, "GENESIS".to_string(), "r1", "approved", false);
+        let second = make_record(1, first.chain.record_hash.clone(), "r2", "approved", false);
+        first.explanation = Some(ledger_core::record::ExplanationContext {
+            rationale_summary: "Low risk profile".to_string(),
+            key_factors: vec![
+                ledger_core::record::ExplanationFactor {
+                    name: "credit_score".to_string(),
+                    weight: 0.7,
+                    evidence: None,
+                },
+                ledger_core::record::ExplanationFactor {
+                    name: "debt_to_income".to_string(),
+                    weight: 0.2,
+                    evidence: None,
+                },
+            ],
+            confidence_score: Some(0.89),
+            alternative_outcomes: vec!["manual_review".to_string()],
+            policy_trace: vec!["loan-policy-v3.rule-12".to_string()],
+        });
+        first.chain.record_hash = compute_record_hash(&first).expect("hash");
+
+        let report = build_report(&[first, second]).expect("report");
+        assert_eq!(report.explainability_records, 1);
+        assert_eq!(report.explainability_coverage_pct, 50.0);
+        assert!(!report.top_explanatory_factors.is_empty());
+        assert_eq!(report.top_explanatory_factors[0].factor, "credit_score");
     }
 }

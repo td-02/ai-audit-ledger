@@ -64,12 +64,23 @@ func main() {
 		PolicyIDs:    []string{"loan-policy-v3", "ecoa-review-rule"},
 		RiskLevel:    "medium",
 	}, func(context.Context) (audit.AIResponse, error) {
+		confidence := 0.91
+		factorEvidenceA := "bureau:742"
+		factorEvidenceB := "dti:0.22"
 		return audit.AIResponse{
-			Outcome:      "approved",
-			Summary:      "Application approved within policy limits.",
-			Prompt:       "Evaluate this application against credit policy.",
-			ResponseBody: `{"result":"approved"}`,
-			ToolCalls:    []string{"fraud_check", "kyc_profile"},
+			Outcome:          "approved",
+			Summary:          "Application approved within policy limits.",
+			Prompt:           "Evaluate this application against credit policy.",
+			ResponseBody:     `{"result":"approved"}`,
+			ToolCalls:        []string{"fraud_check", "kyc_profile"},
+			RationaleSummary: "Applicant meets policy thresholds for score, debt load, and verified employment.",
+			KeyFactors: []audit.ExplanationFactor{
+				{Name: "credit_score", Weight: 0.62, Evidence: &factorEvidenceA},
+				{Name: "debt_to_income", Weight: 0.31, Evidence: &factorEvidenceB},
+			},
+			ConfidenceScore:     &confidence,
+			AlternativeOutcomes: []string{"manual_review"},
+			PolicyTrace:         []string{"loan-policy-v3.rule-12", "loan-policy-v3.rule-18"},
 		}, nil
 	})
 	if err != nil {

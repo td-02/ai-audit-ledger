@@ -3,17 +3,18 @@ package audit
 import "time"
 
 type AuditRecord struct {
-	Version     string             `json:"version"`
-	RecordID    string             `json:"record_id"`
-	TenantID    string             `json:"tenant_id"`
-	Application ApplicationContext `json:"application"`
-	Model       ModelContext       `json:"model"`
-	Decision    DecisionContext    `json:"decision"`
-	Policy      PolicyContext      `json:"policy"`
-	Timing      TimingContext      `json:"timing"`
-	Chain       ChainContext       `json:"chain"`
-	Signature   SignatureEnvelope  `json:"signature"`
-	Evidence    []EvidencePointer  `json:"evidence"`
+	Version     string              `json:"version"`
+	RecordID    string              `json:"record_id"`
+	TenantID    string              `json:"tenant_id"`
+	Application ApplicationContext  `json:"application"`
+	Model       ModelContext        `json:"model"`
+	Decision    DecisionContext     `json:"decision"`
+	Explanation *ExplanationContext `json:"explanation,omitempty"`
+	Policy      PolicyContext       `json:"policy"`
+	Timing      TimingContext       `json:"timing"`
+	Chain       ChainContext        `json:"chain"`
+	Signature   SignatureEnvelope   `json:"signature"`
+	Evidence    []EvidencePointer   `json:"evidence"`
 }
 
 type ApplicationContext struct {
@@ -38,6 +39,20 @@ type DecisionContext struct {
 	Summary      *string `json:"summary,omitempty"`
 	PromptHash   *string `json:"prompt_hash,omitempty"`
 	ResponseHash *string `json:"response_hash,omitempty"`
+}
+
+type ExplanationContext struct {
+	RationaleSummary    string              `json:"rationale_summary"`
+	KeyFactors          []ExplanationFactor `json:"key_factors"`
+	ConfidenceScore     *float64            `json:"confidence_score,omitempty"`
+	AlternativeOutcomes []string            `json:"alternative_outcomes,omitempty"`
+	PolicyTrace         []string            `json:"policy_trace,omitempty"`
+}
+
+type ExplanationFactor struct {
+	Name     string  `json:"name"`
+	Weight   float64 `json:"weight"`
+	Evidence *string `json:"evidence,omitempty"`
 }
 
 type PolicyContext struct {
@@ -86,9 +101,14 @@ type CallMetadata struct {
 }
 
 type AIResponse struct {
-	Outcome      string
-	Summary      string
-	Prompt       string
-	ResponseBody string
-	ToolCalls    []string
+	Outcome             string
+	Summary             string
+	Prompt              string
+	ResponseBody        string
+	ToolCalls           []string
+	RationaleSummary    string
+	KeyFactors          []ExplanationFactor
+	ConfidenceScore     *float64
+	AlternativeOutcomes []string
+	PolicyTrace         []string
 }

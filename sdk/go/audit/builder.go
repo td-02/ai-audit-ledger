@@ -60,6 +60,13 @@ func (b Builder) Build(ctx context.Context, meta CallMetadata, response AIRespon
 			PromptHash:   ptr(sha256Text(response.Prompt)),
 			ResponseHash: ptr(sha256Text(response.ResponseBody)),
 		},
+		Explanation: &ExplanationContext{
+			RationaleSummary:    response.RationaleSummary,
+			KeyFactors:          append([]ExplanationFactor{}, response.KeyFactors...),
+			ConfidenceScore:     response.ConfidenceScore,
+			AlternativeOutcomes: response.AlternativeOutcomes,
+			PolicyTrace:         response.PolicyTrace,
+		},
 		Policy: PolicyContext{
 			PolicyIDs:           meta.PolicyIDs,
 			RiskLevel:           meta.RiskLevel,
@@ -93,14 +100,15 @@ func canonicalPayload(record *AuditRecord) ([]byte, error) {
 			"previous_hash": record.Chain.PreviousHash,
 			"sequence":      record.Chain.Sequence,
 		},
-		"decision":  record.Decision,
-		"evidence":  record.Evidence,
-		"model":     record.Model,
-		"policy":    record.Policy,
-		"record_id": record.RecordID,
-		"tenant_id": record.TenantID,
-		"timing":    record.Timing,
-		"version":   record.Version,
+		"decision":    record.Decision,
+		"explanation": record.Explanation,
+		"evidence":    record.Evidence,
+		"model":       record.Model,
+		"policy":      record.Policy,
+		"record_id":   record.RecordID,
+		"tenant_id":   record.TenantID,
+		"timing":      record.Timing,
+		"version":     record.Version,
 	}
 	return json.Marshal(payload)
 }

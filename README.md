@@ -59,6 +59,10 @@ record, err := emitter.CaptureCall(ctx, audit.CallMetadata{
 
 The SDK intercepts the call, builds the `AuditRecord`, signs it, and ships it to the ledger server — all transparent to your business logic.
 
+The `AuditRecord` captures both:
+- what decision was made (`decision.outcome`, policy context)
+- why it was made (`explanation.rationale_summary`, weighted factors, confidence, policy trace)
+
 ---
 
 ## Security model

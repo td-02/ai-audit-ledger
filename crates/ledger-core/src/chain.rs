@@ -14,6 +14,7 @@ pub fn canonical_payload(record: &AuditRecord) -> Value {
             "sequence": record.chain.sequence
         },
         "decision": record.decision,
+        "explanation": record.explanation,
         "evidence": record.evidence,
         "model": record.model,
         "policy": record.policy,
@@ -70,8 +71,8 @@ pub fn verify_signature(record: &AuditRecord, public_key_bytes: &[u8]) -> Result
 mod tests {
     use super::*;
     use crate::record::{
-        ApplicationContext, ChainContext, DecisionContext, EvidencePointer, ModelContext,
-        PolicyContext, SignatureEnvelope, TimingContext,
+        ApplicationContext, ChainContext, DecisionContext, EvidencePointer, ExplanationContext,
+        ExplanationFactor, ModelContext, PolicyContext, SignatureEnvelope, TimingContext,
     };
     use chrono::Utc;
     use ed25519_dalek::{Signer, SigningKey};
@@ -109,6 +110,24 @@ mod tests {
                 prompt_hash: Some("sha256:prompt".to_string()),
                 response_hash: Some("sha256:response".to_string()),
             },
+            explanation: Some(ExplanationContext {
+                rationale_summary: "Approved due to low risk and stable income.".to_string(),
+                key_factors: vec![
+                    ExplanationFactor {
+                        name: "credit_score".to_string(),
+                        weight: 0.62,
+                        evidence: Some("bureau:742".to_string()),
+                    },
+                    ExplanationFactor {
+                        name: "debt_to_income".to_string(),
+                        weight: 0.31,
+                        evidence: Some("dti:0.22".to_string()),
+                    },
+                ],
+                confidence_score: Some(0.91),
+                alternative_outcomes: vec!["manual_review".to_string()],
+                policy_trace: vec!["loan-policy-v3.rule-12".to_string()],
+            }),
             policy: PolicyContext {
                 policy_ids: vec!["policy-1".to_string()],
                 risk_level: "low".to_string(),
@@ -205,5 +224,21 @@ mod tests {
         record.decision.outcome = "denied".to_string();
         let err = verify_signature(&record, &public_key).expect_err("must reject tampering");
         assert!(err.to_string().contains("signature error"));
+    }
+
+    #[test]
+    fn record_hash_changes_when_explanation_changes() {
+        let mut first = sample_record();
+        first.chain.record_hash = compute_record_hash(&first).expect("hash");
+
+        let mut second = first.clone();
+        second
+            .explanation
+            .as_mut()
+            .expect("explanation")
+            .rationale_summary = "Changed rationale".to_string();
+        second.chain.record_hash = compute_record_hash(&second).expect("hash");
+
+        assert_ne!(first.chain.record_hash, second.chain.record_hash);
     }
 }

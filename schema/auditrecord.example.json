@@ -26,6 +26,29 @@
     "prompt_hash": "sha256:6de4f6d3",
     "response_hash": "sha256:17fbbf90"
   },
+  "explanation": {
+    "rationale_summary": "Approved because score and affordability thresholds passed with verified income.",
+    "key_factors": [
+      {
+        "name": "credit_score",
+        "weight": 0.62,
+        "evidence": "bureau:742"
+      },
+      {
+        "name": "debt_to_income",
+        "weight": 0.31,
+        "evidence": "dti:0.22"
+      }
+    ],
+    "confidence_score": 0.91,
+    "alternative_outcomes": [
+      "manual_review"
+    ],
+    "policy_trace": [
+      "loan-policy-v3.rule-12",
+      "loan-policy-v3.rule-18"
+    ]
+  },
   "policy": {
     "policy_ids": [
       "loan-policy-v3",

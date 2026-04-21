@@ -9,6 +9,7 @@
    - previous record hash
    - actor and tenant identifiers
    - decision metadata
+   - explanation metadata (`rationale_summary`, key factors, confidence, policy trace)
    - evidence pointers
 4. The SDK signs the record payload with an Ed25519 private key.
 5. The exporter sends the record to the ledger collector over an OTel-aligned envelope.
@@ -35,4 +36,3 @@ Engineering teams already ship spans and events. Treating an audit emission as a
 ### Open core licensing
 
 The repo is structured so the protocol and core primitives can remain open while cloud-only commercial control points stay separable.
-

@@ -10,6 +10,7 @@
     "application",
     "model",
     "decision",
+    "explanation",
     "policy",
     "timing",
     "chain",
@@ -95,6 +96,39 @@
       },
       "additionalProperties": false
     },
+    "explanation": {
+      "type": "object",
+      "required": [
+        "rationale_summary",
+        "key_factors"
+      ],
+      "properties": {
+        "rationale_summary": { "type": "string" },
+        "key_factors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "weight"],
+            "properties": {
+              "name": { "type": "string" },
+              "weight": { "type": "number" },
+              "evidence": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "confidence_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "alternative_outcomes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "policy_trace": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
     "timing": {
       "type": "object",
       "required": [
@@ -157,4 +191,3 @@
   },
   "additionalProperties": false
 }
-

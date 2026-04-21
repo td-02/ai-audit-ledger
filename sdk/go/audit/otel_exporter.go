@@ -73,6 +73,22 @@ func (e OTelSpanExporter) Export(ctx context.Context, record *AuditRecord) error
 	if record.Chain.MerkleBatchID != nil {
 		attrs = append(attrs, attribute.String("audit.chain.merkle_batch_id", *record.Chain.MerkleBatchID))
 	}
+	if record.Explanation != nil {
+		attrs = append(attrs, attribute.String("audit.explanation.rationale_summary", record.Explanation.RationaleSummary))
+		if record.Explanation.ConfidenceScore != nil {
+			attrs = append(attrs, attribute.Float64("audit.explanation.confidence_score", *record.Explanation.ConfidenceScore))
+		}
+		if len(record.Explanation.PolicyTrace) > 0 {
+			attrs = append(attrs, attribute.StringSlice("audit.explanation.policy_trace", record.Explanation.PolicyTrace))
+		}
+		if len(record.Explanation.KeyFactors) > 0 {
+			factors := make([]string, 0, len(record.Explanation.KeyFactors))
+			for _, factor := range record.Explanation.KeyFactors {
+				factors = append(factors, factor.Name)
+			}
+			attrs = append(attrs, attribute.StringSlice("audit.explanation.key_factor_names", factors))
+		}
+	}
 
 	span.SetAttributes(attrs...)
 	span.SetStatus(codes.Ok, "audit record emitted")

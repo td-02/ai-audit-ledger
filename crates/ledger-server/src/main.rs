@@ -289,6 +289,7 @@ mod tests {
                 prompt_hash: None,
                 response_hash: None,
             },
+            explanation: None,
             policy: PolicyContext {
                 policy_ids: vec!["policy-a".to_string()],
                 risk_level: "low".to_string(),

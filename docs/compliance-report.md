@@ -28,6 +28,8 @@ The current CLI outputs a signed JSON report artifact containing:
 - Merkle root
 - number of generated Merkle proofs and pass/fail verification status
 - full Merkle proofs for each record hash
+- explainability coverage (`explainability_records`, `explainability_coverage_pct`)
+- top explanatory factors with occurrence count and average weight
 - observed policy identifiers
 - observed decision outcomes
 - exception list

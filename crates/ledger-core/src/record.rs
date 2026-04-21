@@ -8,6 +8,8 @@ pub struct AuditRecord {
     pub application: ApplicationContext,
     pub model: ModelContext,
     pub decision: DecisionContext,
+    #[serde(default)]
+    pub explanation: Option<ExplanationContext>,
     pub policy: PolicyContext,
     pub timing: TimingContext,
     pub chain: ChainContext,
@@ -41,6 +43,25 @@ pub struct DecisionContext {
     pub summary: Option<String>,
     pub prompt_hash: Option<String>,
     pub response_hash: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ExplanationContext {
+    pub rationale_summary: String,
+    #[serde(default)]
+    pub key_factors: Vec<ExplanationFactor>,
+    pub confidence_score: Option<f64>,
+    #[serde(default)]
+    pub alternative_outcomes: Vec<String>,
+    #[serde(default)]
+    pub policy_trace: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ExplanationFactor {
+    pub name: String,
+    pub weight: f64,
+    pub evidence: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
