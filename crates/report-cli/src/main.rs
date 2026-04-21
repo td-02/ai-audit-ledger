@@ -1,7 +1,11 @@
 use std::{env, fs};
 
 use anyhow::{bail, Context, Result};
-use ledger_core::{chain::verify_chain_link, merkle::compute_merkle_root, record::AuditRecord};
+use ledger_core::{
+    chain::verify_chain_link,
+    merkle::{build_merkle_proof, compute_merkle_root, verify_merkle_proof},
+    record::AuditRecord,
+};
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -12,6 +16,8 @@ struct ComplianceReport {
     head_sequence: u64,
     head_hash: String,
     merkle_root: String,
+    proofs_generated: usize,
+    merkle_proof_validation_passed: bool,
     policies_observed: Vec<String>,
     outcomes: Vec<String>,
     exceptions: Vec<String>,
@@ -54,6 +60,7 @@ fn verify_records(records: &[AuditRecord]) -> Result<()> {
 
 fn build_report(records: &[AuditRecord]) -> ComplianceReport {
     let head = records.last().expect("records should be non-empty");
+    let (proofs_generated, merkle_proof_validation_passed) = proof_verification(records);
 
     let mut policies = std::collections::BTreeSet::new();
     let mut outcomes = std::collections::BTreeSet::new();
@@ -75,16 +82,35 @@ fn build_report(records: &[AuditRecord]) -> ComplianceReport {
         record_count: records.len(),
         head_sequence: head.chain.sequence,
         head_hash: head.chain.record_hash.clone(),
-        merkle_root: compute_merkle_root(
-            &records
-                .iter()
-                .map(|record| record.chain.record_hash.clone())
-                .collect::<Vec<_>>(),
-        ),
+        merkle_root: compute_merkle_root(&record_hashes(records)),
+        proofs_generated,
+        merkle_proof_validation_passed,
         policies_observed: policies.into_iter().collect(),
         outcomes: outcomes.into_iter().collect(),
         exceptions,
     }
+}
+
+fn record_hashes(records: &[AuditRecord]) -> Vec<String> {
+    records
+        .iter()
+        .map(|record| record.chain.record_hash.clone())
+        .collect()
+}
+
+fn proof_verification(records: &[AuditRecord]) -> (usize, bool) {
+    let leaves = record_hashes(records);
+    let mut proofs_generated = 0usize;
+    for (idx, _) in leaves.iter().enumerate() {
+        let Some(proof) = build_merkle_proof(&leaves, idx) else {
+            return (proofs_generated, false);
+        };
+        proofs_generated += 1;
+        if !verify_merkle_proof(&proof) {
+            return (proofs_generated, false);
+        }
+    }
+    (proofs_generated, true)
 }
 
 #[cfg(test)]
@@ -191,6 +217,8 @@ mod tests {
         assert_eq!(report.tenant_id, "tenant-1");
         assert_eq!(report.record_count, 2);
         assert_eq!(report.head_sequence, 1);
+        assert_eq!(report.proofs_generated, 2);
+        assert!(report.merkle_proof_validation_passed);
         assert_eq!(
             report.outcomes,
             vec!["approved".to_string(), "denied".to_string()]
