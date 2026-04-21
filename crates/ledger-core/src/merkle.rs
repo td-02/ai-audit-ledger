@@ -30,3 +30,52 @@ pub fn compute_merkle_root(leaves: &[String]) -> String {
 
     format!("sha256:{}", hex::encode(&level[0]))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::compute_merkle_root;
+
+    #[test]
+    fn empty_merkle_root_is_constant() {
+        let leaves: Vec<String> = vec![];
+        assert_eq!(compute_merkle_root(&leaves), "sha256:empty");
+    }
+
+    #[test]
+    fn single_leaf_root_is_stable() {
+        let leaves = vec!["sha256:a".to_string()];
+        let first = compute_merkle_root(&leaves);
+        let second = compute_merkle_root(&leaves);
+        assert_eq!(first, second);
+        assert!(first.starts_with("sha256:"));
+    }
+
+    #[test]
+    fn odd_number_of_leaves_is_deterministic() {
+        let leaves = vec![
+            "sha256:1".to_string(),
+            "sha256:2".to_string(),
+            "sha256:3".to_string(),
+        ];
+        let first = compute_merkle_root(&leaves);
+        let second = compute_merkle_root(&leaves);
+        assert_eq!(first, second);
+    }
+
+    #[test]
+    fn leaf_order_changes_root() {
+        let ordered = vec![
+            "sha256:1".to_string(),
+            "sha256:2".to_string(),
+            "sha256:3".to_string(),
+            "sha256:4".to_string(),
+        ];
+        let swapped = vec![
+            "sha256:1".to_string(),
+            "sha256:3".to_string(),
+            "sha256:2".to_string(),
+            "sha256:4".to_string(),
+        ];
+        assert_ne!(compute_merkle_root(&ordered), compute_merkle_root(&swapped));
+    }
+}
