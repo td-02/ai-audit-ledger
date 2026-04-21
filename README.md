@@ -163,7 +163,7 @@ go build -buildvcs=false ./examples/go-app
 |---|---|---|
 | 1 — Schema & structure | Done | AuditRecord schema, docs, repo layout |
 | 2 — Rust ledger core |  Done | SHA-256 chaining, Ed25519 verification, Merkle tree, Axum server |
-| 3 — Go SDK + exporter |  Done | Builder, signer, OTel-shaped exporter, end-to-end example |
+| 3 — Go SDK + exporter |  Done | Builder, signer, native OTel span exporter, end-to-end example |
 | 4 — Report CLI |  In progress | Chain verification + regulator-facing compliance reports |
 
 ---
@@ -172,7 +172,6 @@ go build -buildvcs=false ./examples/go-app
 
 - [ ] `report-cli`: full chain walk + Merkle proof generation
 - [ ] Compliance report renderer (JSON + human-readable)
-- [ ] Real OTel exporter wrapping (drop-in alongside existing tracing)
 - [ ] Persistent sequence provider (replace `StaticSequenceProvider` with ledger-backed)
 - [ ] Multi-tenant key registry
 - [ ] Anchoring: publish Merkle roots to a transparency log

@@ -12,12 +12,12 @@ type Exporter interface {
 	Export(ctx context.Context, record *AuditRecord) error
 }
 
-type OTLPAuditExporter struct {
+type LedgerHTTPExporter struct {
 	Endpoint   string
 	HTTPClient *http.Client
 }
 
-func (e OTLPAuditExporter) Export(ctx context.Context, record *AuditRecord) error {
+func (e LedgerHTTPExporter) Export(ctx context.Context, record *AuditRecord) error {
 	client := e.HTTPClient
 	if client == nil {
 		client = http.DefaultClient
@@ -45,3 +45,6 @@ func (e OTLPAuditExporter) Export(ctx context.Context, record *AuditRecord) erro
 	}
 	return nil
 }
+
+// Backward-compatible alias from the initial scaffold.
+type OTLPAuditExporter = LedgerHTTPExporter

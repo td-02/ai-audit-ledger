@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/TAPESH/ai-audit-ledger/sdk/go/audit"
 )
@@ -16,6 +17,20 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	otlpEndpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
+	if otlpEndpoint == "" {
+		otlpEndpoint = "http://127.0.0.1:4318"
+	}
+	otelPipeline, err := audit.NewOTLPSpanPipeline(ctx, "loan-underwriter", otlpEndpoint)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if shutdownErr := otelPipeline.Shutdown(context.Background()); shutdownErr != nil {
+			log.Printf("otel shutdown error: %v", shutdownErr)
+		}
+	}()
 
 	emitter := audit.Emitter{
 		Builder: audit.Builder{
@@ -28,8 +43,11 @@ func main() {
 				PreviousHash: "GENESIS",
 			},
 		},
-		Exporter: audit.OTLPAuditExporter{
-			Endpoint: "http://127.0.0.1:8080",
+		Exporter: audit.MultiExporter{
+			Exporters: []audit.Exporter{
+				audit.LedgerHTTPExporter{Endpoint: "http://127.0.0.1:8080"},
+				otelPipeline.Exporter,
+			},
 		},
 	}
 
