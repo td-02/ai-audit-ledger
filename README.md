@@ -157,6 +157,8 @@ curl http://127.0.0.1:8080/v1/chain/head
 | `POST` | `/v1/records` | Append a signed AuditRecord |
 | `GET` | `/v1/records/:id` | Retrieve a record by ID |
 | `GET` | `/v1/chain/head` | Current head sequence, hash, and Merkle root |
+| `GET` | `/v1/proofs/:record_id` | Merkle proof for a specific record |
+| `GET` | `/v1/proofs/head` | Merkle proof for the current chain head |
 
 ---
 
@@ -173,6 +175,13 @@ cargo test
 
 ```bash
 go build -buildvcs=false ./examples/go-app
+```
+
+### Signed compliance artifact
+
+```bash
+cargo run -p report-cli -- generate data/ledger.jsonl outputs/report.json <private_key_hex_64> report-key-1
+cargo run -p report-cli -- verify outputs/report.json <public_key_hex_64>
 ```
 
 ---

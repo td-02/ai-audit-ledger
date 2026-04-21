@@ -807,10 +807,14 @@ name = "report-cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "base64",
  "chrono",
+ "ed25519-dalek",
+ "hex",
  "ledger-core",
  "serde",
  "serde_json",
+ "sha2",
 ]
 
 [[package]]

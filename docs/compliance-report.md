@@ -20,15 +20,26 @@ The report layer is verifier-first rather than dashboard-first.
 
 ## Output shape
 
-The current CLI outputs a JSON report containing:
+The current CLI outputs a signed JSON report artifact containing:
 
 - tenant identifier
 - total verified record count
 - chain head sequence and hash
 - Merkle root
 - number of generated Merkle proofs and pass/fail verification status
+- full Merkle proofs for each record hash
 - observed policy identifiers
 - observed decision outcomes
 - exception list
+
+## CLI
+
+Generate signed report:
+
+`report-cli generate <ledger.jsonl> <report.json> <private_key_hex> <public_key_id>`
+
+Verify signed report:
+
+`report-cli verify <report.json> <public_key_hex>`
 
 This is the bridge from engineering evidence to auditor-facing artifacts.
