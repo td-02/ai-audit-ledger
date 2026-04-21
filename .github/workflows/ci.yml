@@ -16,6 +16,8 @@ jobs:
         run: cargo fmt --all -- --check
       - name: Rust lint
         run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Rust build
+        run: cargo build --workspace
       - name: Rust tests
         run: cargo test --workspace
 
@@ -29,5 +31,5 @@ jobs:
       - name: Go fmt check
         run: test -z "$(gofmt -l sdk/go examples/go-app)"
       - name: Go build
-        run: go build -buildvcs=false ./examples/go-app
+        run: go build -buildvcs=false ./...
 

@@ -1,6 +1,6 @@
-module github.com/TAPESH/ai-audit-ledger
+module github.com/td-02/ai-audit-ledger
 
-go 1.26.0
+go 1.23.0
 
 require (
 	go.opentelemetry.io/otel v1.38.0

@@ -8,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/TAPESH/ai-audit-ledger/sdk/go/audit"
+	"github.com/td-02/ai-audit-ledger/sdk/go/audit"
 )
 
 func main() {
