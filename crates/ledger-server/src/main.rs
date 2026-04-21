@@ -12,11 +12,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
-use ledger_core::{
-    chain::verify_chain_link,
-    merkle::compute_merkle_root,
-    record::AuditRecord,
-};
+use ledger_core::{chain::verify_chain_link, merkle::compute_merkle_root, record::AuditRecord};
 use serde::Serialize;
 use tokio::{
     fs::{self, OpenOptions},
@@ -162,4 +158,3 @@ async fn get_chain_head(
 fn internal_error(error: impl std::fmt::Display) -> (StatusCode, String) {
     (StatusCode::BAD_REQUEST, error.to_string())
 }
-

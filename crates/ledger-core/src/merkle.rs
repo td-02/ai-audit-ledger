@@ -30,4 +30,3 @@ pub fn compute_merkle_root(leaves: &[String]) -> String {
 
     format!("sha256:{}", hex::encode(&level[0]))
 }
-

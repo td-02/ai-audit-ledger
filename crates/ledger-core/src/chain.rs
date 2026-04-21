@@ -60,10 +60,8 @@ pub fn verify_signature(record: &AuditRecord, public_key_bytes: &[u8]) -> Result
         .signature
         .strip_prefix("base64:")
         .unwrap_or(&record.signature.signature);
-    let signature = Signature::from_slice(
-        &base64::engine::general_purpose::STANDARD.decode(signature_raw)?,
-    )?;
+    let signature =
+        Signature::from_slice(&base64::engine::general_purpose::STANDARD.decode(signature_raw)?)?;
     verifying_key.verify(&payload, &signature)?;
     Ok(())
 }
-

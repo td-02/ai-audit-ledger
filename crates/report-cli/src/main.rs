@@ -1,11 +1,7 @@
 use std::{env, fs};
 
 use anyhow::{bail, Context, Result};
-use ledger_core::{
-    chain::verify_chain_link,
-    merkle::compute_merkle_root,
-    record::AuditRecord,
-};
+use ledger_core::{chain::verify_chain_link, merkle::compute_merkle_root, record::AuditRecord};
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -69,10 +65,7 @@ fn build_report(records: &[AuditRecord]) -> ComplianceReport {
         }
         outcomes.insert(record.decision.outcome.clone());
         if record.policy.requires_human_review.unwrap_or(false) {
-            exceptions.push(format!(
-                "record {} requires human review",
-                record.record_id
-            ));
+            exceptions.push(format!("record {} requires human review", record.record_id));
         }
     }
 

@@ -78,4 +78,3 @@ pub struct EvidencePointer {
     pub uri: String,
     pub digest: Option<String>,
 }
-

@@ -140,6 +140,23 @@ go run main.go
 
 ---
 
+## Build and verify
+
+### Rust
+
+```bash
+cargo check
+cargo test
+```
+
+### Go
+
+```bash
+go build -buildvcs=false ./examples/go-app
+```
+
+---
+
 ## Build status
 
 | Phase | Status | Description |
