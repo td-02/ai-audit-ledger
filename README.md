@@ -181,4 +181,8 @@ go build -buildvcs=false ./examples/go-app
 
 ## License
 
-MIT
+Apache-2.0 for core components in this repository.
+
+BSL-1.1 for cloud-layer code under `cloud/`, converting to Apache-2.0 on the change date in `LICENSES/BSL-1.1.md`.
+
+See `docs/licensing.md` for the exact boundary.
