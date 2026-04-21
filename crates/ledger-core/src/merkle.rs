@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
 fn hash_bytes(parts: &[&[u8]]) -> Vec<u8> {
@@ -8,19 +9,19 @@ fn hash_bytes(parts: &[&[u8]]) -> Vec<u8> {
     hasher.finalize().to_vec()
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum MerkleSiblingPosition {
     Left,
     Right,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MerkleProofStep {
     pub hash: String,
     pub position: MerkleSiblingPosition,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MerkleProof {
     pub leaf_index: usize,
     pub leaf_value: String,
