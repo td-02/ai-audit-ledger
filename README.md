@@ -130,6 +130,26 @@ go run main.go
 # emitted record 1745123456789-trace-001 with hash sha256:...
 ```
 
+## Quickstart (end-to-end in 5 minutes)
+
+Terminal 1:
+
+```bash
+cargo run -p ledger-server
+```
+
+Terminal 2:
+
+```bash
+go run ./examples/go-app
+```
+
+Verify chain head:
+
+```bash
+curl http://127.0.0.1:8080/v1/chain/head
+```
+
 **API endpoints:**
 
 | Method | Path | Description |
@@ -186,3 +206,9 @@ Apache-2.0 for core components in this repository.
 BSL-1.1 for cloud-layer code under `cloud/`, converting to Apache-2.0 on the change date in `LICENSES/BSL-1.1.md`.
 
 See `docs/licensing.md` for the exact boundary.
+
+## Community
+
+- Contribution guide: `CONTRIBUTING.md`
+- Code of conduct: `CODE_OF_CONDUCT.md`
+- Issue templates: `.github/ISSUE_TEMPLATE/`
