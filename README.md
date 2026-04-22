@@ -164,6 +164,95 @@ curl http://127.0.0.1:8080/v1/chain/head
 | `GET` | `/v1/proofs/:record_id` | Merkle proof for a specific record |
 | `GET` | `/v1/proofs/head` | Merkle proof for the current chain head |
 
+## Sample output
+
+`POST /v1/records`
+
+```json
+{
+  "accepted": true,
+  "sequence": 42,
+  "merkle_root": "sha256:8dff5b4c5ef4d50d78d0ff0a9f7b5e10e1b9e9d9f1cc1b2b655a4f39f13c5b43"
+}
+```
+
+`GET /v1/proofs/head`
+
+```json
+{
+  "record_id": "1745382544123456700-trace-001",
+  "sequence": 42,
+  "merkle_root": "sha256:8dff5b4c5ef4d50d78d0ff0a9f7b5e10e1b9e9d9f1cc1b2b655a4f39f13c5b43",
+  "proof": {
+    "leaf_index": 42,
+    "leaf_value": "sha256:ec95b41ae9d8468c2f5e151f30b016493e730604bd51dbad8da8b6bd6b30a22c",
+    "path": [
+      {
+        "hash": "sha256:b5c75fcbbe78f04f1a0f8b041aa4f4d18cc8af73a12306c2ad4ddfc4b3e4d7bf",
+        "position": "Right"
+      },
+      {
+        "hash": "sha256:77d64c1824d2f15ece33296a9e37265fe0e9f237f38ed91ef64f1b9f2ff12846",
+        "position": "Left"
+      }
+    ],
+    "root": "sha256:8dff5b4c5ef4d50d78d0ff0a9f7b5e10e1b9e9d9f1cc1b2b655a4f39f13c5b43"
+  }
+}
+```
+
+`outputs/report.json` (from `report-cli generate`)
+
+```json
+{
+  "report": {
+    "generated_at": "2026-04-22T11:15:43.196418Z",
+    "tenant_id": "bank-prod",
+    "record_count": 1,
+    "head_sequence": 42,
+    "head_hash": "sha256:ec95b41ae9d8468c2f5e151f30b016493e730604bd51dbad8da8b6bd6b30a22c",
+    "merkle_root": "sha256:8dff5b4c5ef4d50d78d0ff0a9f7b5e10e1b9e9d9f1cc1b2b655a4f39f13c5b43",
+    "proofs_generated": 1,
+    "merkle_proof_validation_passed": true,
+    "proofs": [
+      {
+        "leaf_index": 0,
+        "leaf_value": "sha256:ec95b41ae9d8468c2f5e151f30b016493e730604bd51dbad8da8b6bd6b30a22c",
+        "path": [],
+        "root": "sha256:8dff5b4c5ef4d50d78d0ff0a9f7b5e10e1b9e9d9f1cc1b2b655a4f39f13c5b43"
+      }
+    ],
+    "explainability_records": 1,
+    "explainability_coverage_pct": 100.0,
+    "top_explanatory_factors": [
+      {
+        "factor": "credit_score",
+        "occurrences": 1,
+        "avg_weight": 0.62
+      },
+      {
+        "factor": "debt_to_income",
+        "occurrences": 1,
+        "avg_weight": 0.31
+      }
+    ],
+    "policies_observed": [
+      "loan-policy-v3"
+    ],
+    "outcomes": [
+      "approved"
+    ],
+    "exceptions": []
+  },
+  "signature": {
+    "algorithm": "Ed25519",
+    "public_key_id": "report-key-1",
+    "digest": "sha256:7108d8a8df98fce6400de0f6a84427f3f8edba0cd8ecef91aa8a80ecdeaf8df1",
+    "signature": "base64:Y4R6xF0Mjbj8Ih8g2SYWVr4KxCV7W5PXhQ4D+ai3f3k3fQx7vUQ3uI2e+8C+K5kTFkS+J8Y4v43U1Kq7qxbhBw=="
+  }
+}
+```
+
 ---
 
 ## Build and verify
