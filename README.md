@@ -294,7 +294,7 @@ cargo run -p report-cli -- verify outputs/report.json <public_key_hex_64>
 
 - [ ] `report-cli`: full chain walk + Merkle proof generation
 - [ ] Compliance report renderer (JSON + human-readable)
-- [ ] Persistent sequence provider (replace `StaticSequenceProvider` with ledger-backed)
+- [x] Ledger-backed sequence provider (`LedgerChainSequenceProvider`) for multi-record chains
 - [ ] Multi-tenant key registry
 - [ ] Anchoring: publish Merkle roots to a transparency log
 

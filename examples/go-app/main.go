@@ -38,9 +38,8 @@ func main() {
 				PublicKeyID: "demo-key-1",
 				PrivateKey:  privateKey,
 			},
-			SequenceProvider: audit.StaticSequenceProvider{
-				Sequence:     0,
-				PreviousHash: "GENESIS",
+			SequenceProvider: audit.LedgerChainSequenceProvider{
+				Endpoint: "http://127.0.0.1:8080",
 			},
 		},
 		Exporter: audit.MultiExporter{
@@ -52,17 +51,18 @@ func main() {
 	}
 
 	record, err := emitter.CaptureCall(ctx, audit.CallMetadata{
-		TenantID:     "bank-prod",
-		AppName:      "loan-underwriter",
-		Environment:  "prod",
-		ActorID:      "customer-9182",
-		TraceID:      "trace-001",
-		ModelName:    "gpt-4.1",
-		ProviderName: "openai",
-		Action:       "loan_decision",
-		Category:     "credit",
-		PolicyIDs:    []string{"loan-policy-v3", "ecoa-review-rule"},
-		RiskLevel:    "medium",
+		TenantID:            "bank-prod",
+		AppName:             "loan-underwriter",
+		Environment:         "prod",
+		ActorID:             "customer-9182",
+		TraceID:             "trace-001",
+		ModelName:           "gpt-4.1",
+		ProviderName:        "openai",
+		Action:              "loan_decision",
+		Category:            "credit",
+		PolicyIDs:           []string{"loan-policy-v3", "ecoa-review-rule"},
+		RiskLevel:           "medium",
+		RequiresHumanReview: false,
 	}, func(context.Context) (audit.AIResponse, error) {
 		confidence := 0.91
 		factorEvidenceA := "bureau:742"

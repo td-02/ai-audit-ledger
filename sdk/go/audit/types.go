@@ -87,17 +87,18 @@ type EvidencePointer struct {
 }
 
 type CallMetadata struct {
-	TenantID     string
-	AppName      string
-	Environment  string
-	ActorID      string
-	TraceID      string
-	ModelName    string
-	ProviderName string
-	Action       string
-	Category     string
-	PolicyIDs    []string
-	RiskLevel    string
+	TenantID            string
+	AppName             string
+	Environment         string
+	ActorID             string
+	TraceID             string
+	ModelName           string
+	ProviderName        string
+	Action              string
+	Category            string
+	PolicyIDs           []string
+	RiskLevel           string
+	RequiresHumanReview bool
 }
 
 type AIResponse struct {

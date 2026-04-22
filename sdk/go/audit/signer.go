@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 )
 
@@ -19,17 +18,12 @@ func (s Signer) SignRecord(record *AuditRecord) error {
 	if err != nil {
 		return err
 	}
-	record.Chain.RecordHash = hashJSON(payload)
+	sum := sha256.Sum256(payload)
+	record.Chain.RecordHash = fmt.Sprintf("sha256:%s", hex.EncodeToString(sum[:]))
 	record.Signature = SignatureEnvelope{
 		Algorithm:   "Ed25519",
 		PublicKeyID: s.PublicKeyID,
 		Signature:   "base64:" + base64.StdEncoding.EncodeToString(ed25519.Sign(s.PrivateKey, payload)),
 	}
 	return nil
-}
-
-func hashJSON(v any) string {
-	raw, _ := json.Marshal(v)
-	sum := sha256.Sum256(raw)
-	return fmt.Sprintf("sha256:%s", hex.EncodeToString(sum[:]))
 }

@@ -29,7 +29,20 @@ type Builder struct {
 
 func (b Builder) Build(ctx context.Context, meta CallMetadata, response AIResponse) (*AuditRecord, error) {
 	started := time.Now().UTC()
-	completed := started.Add(50 * time.Millisecond)
+	completed := time.Now().UTC()
+	return b.BuildWithTiming(ctx, meta, response, started, completed)
+}
+
+func (b Builder) BuildWithTiming(
+	ctx context.Context,
+	meta CallMetadata,
+	response AIResponse,
+	started time.Time,
+	completed time.Time,
+) (*AuditRecord, error) {
+	if completed.Before(started) {
+		completed = started
+	}
 
 	sequence, previousHash, err := b.SequenceProvider.Next(ctx, meta.TenantID)
 	if err != nil {
@@ -70,7 +83,7 @@ func (b Builder) Build(ctx context.Context, meta CallMetadata, response AIRespon
 		Policy: PolicyContext{
 			PolicyIDs:           meta.PolicyIDs,
 			RiskLevel:           meta.RiskLevel,
-			RequiresHumanReview: false,
+			RequiresHumanReview: meta.RequiresHumanReview,
 		},
 		Timing: TimingContext{
 			StartedAt:   started,
@@ -94,21 +107,38 @@ func (b Builder) Build(ctx context.Context, meta CallMetadata, response AIRespon
 }
 
 func canonicalPayload(record *AuditRecord) ([]byte, error) {
-	payload := map[string]any{
-		"application": record.Application,
-		"chain": map[string]any{
-			"previous_hash": record.Chain.PreviousHash,
-			"sequence":      record.Chain.Sequence,
+	type canonicalChain struct {
+		PreviousHash string `json:"previous_hash"`
+		Sequence     uint64 `json:"sequence"`
+	}
+	type canonicalAuditPayload struct {
+		Application ApplicationContext  `json:"application"`
+		Chain       canonicalChain      `json:"chain"`
+		Decision    DecisionContext     `json:"decision"`
+		Explanation *ExplanationContext `json:"explanation"`
+		Evidence    []EvidencePointer   `json:"evidence"`
+		Model       ModelContext        `json:"model"`
+		Policy      PolicyContext       `json:"policy"`
+		RecordID    string              `json:"record_id"`
+		TenantID    string              `json:"tenant_id"`
+		Timing      TimingContext       `json:"timing"`
+		Version     string              `json:"version"`
+	}
+	payload := canonicalAuditPayload{
+		Application: record.Application,
+		Chain: canonicalChain{
+			PreviousHash: record.Chain.PreviousHash,
+			Sequence:     record.Chain.Sequence,
 		},
-		"decision":    record.Decision,
-		"explanation": record.Explanation,
-		"evidence":    record.Evidence,
-		"model":       record.Model,
-		"policy":      record.Policy,
-		"record_id":   record.RecordID,
-		"tenant_id":   record.TenantID,
-		"timing":      record.Timing,
-		"version":     record.Version,
+		Decision:    record.Decision,
+		Explanation: record.Explanation,
+		Evidence:    record.Evidence,
+		Model:       record.Model,
+		Policy:      record.Policy,
+		RecordID:    record.RecordID,
+		TenantID:    record.TenantID,
+		Timing:      record.Timing,
+		Version:     record.Version,
 	}
 	return json.Marshal(payload)
 }
