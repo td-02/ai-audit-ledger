@@ -126,6 +126,12 @@ mkdir -p data
 # Listening on 127.0.0.1:8080
 ```
 
+Or run with Docker Compose:
+
+```bash
+docker compose up --build ledger-server
+```
+
 **Run the example Go app:**
 
 ```bash
@@ -314,3 +320,4 @@ See `docs/licensing.md` for the exact boundary.
 - Contribution guide: `CONTRIBUTING.md`
 - Code of conduct: `CODE_OF_CONDUCT.md`
 - Issue templates: `.github/ISSUE_TEMPLATE/`
+- Security policy: `SECURITY.md`

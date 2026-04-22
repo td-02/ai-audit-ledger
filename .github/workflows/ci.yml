@@ -32,4 +32,6 @@ jobs:
         run: test -z "$(gofmt -l sdk/go examples/go-app)"
       - name: Go build
         run: go build -buildvcs=false ./...
+      - name: Go tests
+        run: go test ./...
 

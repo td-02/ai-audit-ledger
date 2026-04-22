@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/schemas/auditrecord.schema.json",
+  "$id": "https://raw.githubusercontent.com/td-02/ai-audit-ledger/main/schema/auditrecord.schema.json",
   "title": "AuditRecord",
   "type": "object",
   "required": [
